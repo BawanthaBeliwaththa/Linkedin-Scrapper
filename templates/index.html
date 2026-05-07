@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Super Scraper Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0a66c2;
+            --primary-dark: #004182;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a66c2 0%, #004182 50%, #0a66c2 100%);
+            min-height: 100vh;
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            background: 
+                radial-gradient(circle at 20% 50%, #fff 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, #fff 0%, transparent 50%);
+            animation: bgPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title h1 {
+            font-size: 2.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), #00a0dc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header-title p {
+            color: var(--gray-600);
+            font-size: 1.1em;
+        }
+
+        .header-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .badge i {
+            font-size: 14px;
+        }
+
+        .badge.success { background: linear-gradient(135deg, #059669, #10b981); }
+        .badge.warning { background: linear-gradient(135deg, #d97706, #f59e0b); }
+        .badge.info { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+        .badge.purple { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-icon.blue { background: #dbeafe; color: #2563eb; }
+        .stat-icon.green { background: #d1fae5; color: #059669; }
+        .stat-icon.purple { background: #ede9fe; color: #7c3aed; }
+        .stat-icon.orange { background: #ffedd5; color: #ea580c; }
+
+        .stat-info h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1;
+        }
+
+        .stat-info p {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        /* Main Card */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .card-header h2 {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header h2 i {
+            color: var(--primary);
+            font-size: 1.2em;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--gray-100);
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--gray-900);
+            background: var(--gray-200);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--gray-700);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group label i {
+            color: var(--primary);
+            width: 16px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+            color: var(--gray-900);
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: var(--gray-400);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn i {
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gray-300);
+            color: var(--gray-700);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .alert i {
+            font-size: 20px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-warning {
+            background: #ffedd5;
+            color: #9a3412;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* Results */
+        .results-container {
+            margin-top: 24px;
+        }
+
+        .result-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .result-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .result-card.selected {
+            border-color: var(--primary);
+            background: #f0f7ff;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .result-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #00a0dc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .result-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .result-info p {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        /* Profile Detail */
+        .profile-detail {
+            margin-top: 24px;
+            background: var(--gray-50);
+            border-radius: 16px;
+            padding: 24px;
+            display: none;
+        }
+
+        .profile-detail.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .profile-detail h3 {
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--primary);
+            margin: 20px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .experience-item,
+        .education-item {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            color: #5b21b6;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--gray-600);
+            font-size: 14px;
+        }
+
+        /* Settings */
+        .settings-section {
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 12px;
+        }
+
+        .settings-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray-300);
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .header { padding: 24px; }
+            .header-title h1 { font-size: 1.8em; }
+            .card { padding: 20px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .stats-bar { grid-template-columns: 1fr 1fr; }
+            .btn-group { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+
+        /* Export Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            min-width: 300px;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .toast.success { border-left: 4px solid #10b981; }
+        .toast.error { border-left: 4px solid #ef4444; }
+        .toast.info { border-left: 4px solid #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>
+                        <i class="fab fa-linkedin"></i> LinkedIn Super Scraper Pro
+                    </h1>
+                    <p>Advanced LinkedIn data extraction with AI-powered parsing</p>
+                </div>
+                <div class="header-badges">
+                    <span class="badge"><i class="fas fa-robot"></i> AI-Powered</span>
+                    <span class="badge success"><i class="fas fa-shield-halved"></i> Anti-Detection</span>
+                    <span class="badge info"><i class="fas fa-bolt"></i> Fast</span>
+                    <span class="badge purple"><i class="fas fa-globe"></i> Multi-Browser</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="statSearches">0</h3>
+                    <p>Searches Performed</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="statProfiles">0</h3>
+                    <p>Profiles Extracted</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="statRuntime">0s</h3>
+                    <p>Runtime</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="fas fa-plug"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="statStatus">Idle</h3>
+                    <p>Status</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card">
+            <!-- Tabs -->
+            <div class="card-header">
+                <h2><i class="fas fa-cogs"></i> Scraper Control Panel</h2>
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('setup')">
+                        <i class="fas fa-wrench"></i> Setup
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('search')">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('results')">
+                        <i class="fas fa-database"></i> Results
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('settings')">
+                        <i class="fas fa-sliders"></i> Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- Setup Tab -->
+            <div id="setupTab" class="tab-content active">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> LinkedIn Email</label>
+                        <input type="email" id="email" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-key"></i> LinkedIn Password</label>
+                        <input type="password" id="password" placeholder="Enter password">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Session Name</label>
+                        <input type="text" id="sessionName" value="default" placeholder="Session name">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-globe"></i> Browser Type</label>
+                        <select id="browserType">
+                            <option value="chromium">Chromium</option>
+                            <option value="firefox">Firefox</option>
+                            <option value="webkit">WebKit</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="initializeScraper()" id="btnInit">
+                        <i class="fas fa-rocket"></i> Initialize Browser
+                    </button>
+                    <button class="btn btn-success" onclick="loginToLinkedIn()" id="btnLogin" disabled>
+                        <i class="fas fa-sign-in-alt"></i> Login to LinkedIn
+                    </button>
+                    <button class="btn btn-danger" onclick="closeScraper()" id="btnClose" disabled>
+                        <i class="fas fa-power-off"></i> Close
+                    </button>
+                </div>
+                
+                <div id="setupStatus"></div>
+            </div>
+
+            <!-- Search Tab -->
+            <div id="searchTab" class="tab-content">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> First Name *</label>
+                        <input type="text" id="firstName" placeholder="e.g., Bawantha">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Last Name *</label>
+                        <input type="text" id="lastName" placeholder="e.g., Beliwaththa">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-building"></i> Company (Optional)</label>
+                        <input type="text" id="company" placeholder="e.g., University of Hrtfordshire">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-map-marker-alt"></i> Location (Optional)</label>
+                        <input type="text" id="location" placeholder="e.g., Sri Lanka">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-hashtag"></i> Max Results</label>
+                        <select id="maxResults">
+                            <option value="3">3 profiles</option>
+                            <option value="5" selected>5 profiles</option>
+                            <option value="10">10 profiles</option>
+                            <option value="20">20 profiles</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-list-check"></i> Extraction Mode</label>
+                        <select id="extractionMode">
+                            <option value="full" selected>Full Profile</option>
+                            <option value="basic">Basic Info Only</option>
+                            <option value="search">Search Results Only</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="searchProfiles()" id="btnSearch" disabled>
+                        <i class="fas fa-search"></i> Search LinkedIn
+                    </button>
+                    <button class="btn btn-success" onclick="searchAndExtract()" id="btnSearchExtract" disabled>
+                        <i class="fas fa-download"></i> Search & Extract All
+                    </button>
+                </div>
+                
+                <div id="searchStatus"></div>
+            </div>
+
+            <!-- Results Tab -->
+            <div id="resultsTab" class="tab-content">
+                <div class="btn-group" style="margin-bottom: 20px;">
+                    <button class="btn btn-outline" onclick="exportData('json')">
+                        <i class="fas fa-file-code"></i> Export JSON
+                    </button>
+                    <button class="btn btn-outline" onclick="exportData('csv')">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </button>
+                    <button class="btn btn-outline" onclick="clearResults()">
+                        <i class="fas fa-trash"></i> Clear Results
+                    </button>
+                </div>
+                
+                <div id="resultsContainer" class="results-container">
+                    <p style="text-align: center; color: var(--gray-400); padding: 40px;">
+                        <i class="fas fa-inbox" style="font-size: 48px; display: block; margin-bottom: 12px;"></i>
+                        No results yet. Start a search to see profiles here.
+                    </p>
+                </div>
+                
+                <div id="profileDetail" class="profile-detail"></div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="tab-content">
+                <div class="settings-section">
+                    <h3><i class="fas fa-display"></i> Browser Settings</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label><i class="fas fa-eye"></i> Headless Mode</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="headlessMode">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <small style="display: block; margin-top: 4px; color: var(--gray-500);">
+                                Run browser in background
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-brain"></i> AI Parsing</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="aiMode">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <small style="display: block; margin-top: 4px; color: var(--gray-500);">
+                                Use GPT for better extraction
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-shield"></i> Anti-Detection</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="antiDetection" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <small style="display: block; margin-top: 4px; color: var(--gray-500);">
+                                Enable stealth features
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section" style="margin-top: 20px;">
+                    <h3><i class="fas fa-clock"></i> Rate Limiting</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label><i class="fas fa-hourglass-start"></i> Min Delay (seconds)</label>
+                            <input type="number" id="minDelay" value="3" min="1" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-hourglass-end"></i> Max Delay (seconds)</label>
+                            <input type="number" id="maxDelay" value="7" min="2" max="15">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-group" style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                    <button class="btn btn-outline" onclick="resetSettings()">
+                        <i class="fas fa-undo"></i> Reset Defaults
+                    </button>
+                </div>
+                
+                <div id="settingsStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let state = {
+            initialized: false,
+            authenticated: false,
+            currentResults: [],
+            currentProfiles: [],
+            stats: {
+                searches: 0,
+                profiles: 0,
+                runtime: 0
+            }
+        };
+
+        // Settings
+        let settings = {
+            headless: false,
+            aiMode: false,
+            antiDetection: true,
+            minDelay: 3,
+            maxDelay: 7,
+            browserType: 'chromium'
+        };
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const saved = localStorage.getItem('linkedin_scraper_settings');
+            if (saved) {
+                settings = { ...settings, ...JSON.parse(saved) };
+                document.getElementById('headlessMode').checked = settings.headless;
+                document.getElementById('aiMode').checked = settings.aiMode;
+                document.getElementById('antiDetection').checked = settings.antiDetection;
+                document.getElementById('minDelay').value = settings.minDelay;
+                document.getElementById('maxDelay').value = settings.maxDelay;
+                document.getElementById('browserType').value = settings.browserType;
+            }
+        }
+
+        function saveSettings() {
+            settings.headless = document.getElementById('headlessMode').checked;
+            settings.aiMode = document.getElementById('aiMode').checked;
+            settings.antiDetection = document.getElementById('antiDetection').checked;
+            settings.minDelay = parseInt(document.getElementById('minDelay').value) || 3;
+            settings.maxDelay = parseInt(document.getElementById('maxDelay').value) || 7;
+            settings.browserType = document.getElementById('browserType').value;
+            
+            localStorage.setItem('linkedin_scraper_settings', JSON.stringify(settings));
+            showToast('Settings saved successfully!', 'success');
+            showAlert('settingsStatus', 'Settings saved! Will apply on next initialization.', 'success');
+        }
+
+        function resetSettings() {
+            settings = {
+                headless: false,
+                aiMode: false,
+                antiDetection: true,
+                minDelay: 3,
+                maxDelay: 7,
+                browserType: 'chromium'
+            };
+            localStorage.removeItem('linkedin_scraper_settings');
+            loadSettings();
+            showToast('Settings reset to defaults', 'info');
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            const tabButtons = {
+                'setup': 0,
+                'search': 1,
+                'results': 2,
+                'settings': 3
+            };
+            
+            document.querySelectorAll('.tab-btn')[tabButtons[tabName]].classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // Toast notifications
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-times-circle',
+                info: 'fa-info-circle'
+            };
+            
+            toast.innerHTML = `
+                <i class="fas ${icons[type]}" style="color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Alert messages
+        function showAlert(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-times-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+                
+                element.innerHTML = `
+                    <div class="alert alert-${type}">
+                        <i class="fas ${icons[type]}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    if (element.querySelector('.alert')) {
+                        element.innerHTML = '';
+                    }
+                }, 6000);
+            }
+        }
+
+        // Update UI state
+        function updateUIState() {
+            document.getElementById('btnInit').disabled = state.initialized;
+            document.getElementById('btnLogin').disabled = !state.initialized || state.authenticated;
+            document.getElementById('btnClose').disabled = !state.initialized;
+            document.getElementById('btnSearch').disabled = !state.authenticated;
+            document.getElementById('btnSearchExtract').disabled = !state.authenticated;
+            
+            document.getElementById('statSearches').textContent = state.stats.searches;
+            document.getElementById('statProfiles').textContent = state.stats.profiles;
+            document.getElementById('statStatus').textContent = state.authenticated ? 'Connected' : state.initialized ? 'Ready' : 'Idle';
+            document.getElementById('statStatus').style.color = state.authenticated ? '#10b981' : state.initialized ? '#f59e0b' : '#6b7280';
+        }
+
+        // Initialize scraper
+        async function initializeScraper() {
+            const btn = document.getElementById('btnInit');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing...';
+            
+            showAlert('setupStatus', 'Initializing browser... This may take a moment.', 'info');
+            
+            try {
+                const response = await fetch('/api/scraper/init', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        headless: settings.headless,
+                        browser_type: settings.browserType,
+                        session_name: document.getElementById('sessionName').value || 'default'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    state.initialized = true;
+                    showToast('Browser initialized successfully!', 'success');
+                    showAlert('setupStatus', 'Browser ready! You can now login to LinkedIn.', 'success');
+                } else {
+                    showToast('Failed to initialize: ' + (data.error || 'Unknown error'), 'error');
+                    showAlert('setupStatus', 'Initialization failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                showAlert('setupStatus', 'Error: ' + error.message, 'error');
+            } finally {
+                updateUIState();
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-rocket"></i> Initialize Browser';
+            }
+        }
+
+        // Login to LinkedIn
+        async function loginToLinkedIn() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showAlert('setupStatus', 'Please enter email and password', 'warning');
+                return;
+            }
+            
+            const btn = document.getElementById('btnLogin');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            
+            showAlert('setupStatus', 'Logging into LinkedIn... Check browser for security verification.', 'info');
+            
+            try {
+                const response = await fetch('/api/scraper/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    state.authenticated = true;
+                    showToast('Login successful!', 'success');
+                    showAlert('setupStatus', 'Successfully logged into LinkedIn! You can now search for profiles.', 'success');
+                } else {
+                    showToast('Login failed. Check console for details.', 'error');
+                    showAlert('setupStatus', 'Login failed. Please check your credentials and try again.', 'error');
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                showAlert('setupStatus', 'Error: ' + error.message, 'error');
+            } finally {
+                updateUIState();
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to LinkedIn';
+            }
+        }
+
+        // Search profiles
+        async function searchProfiles() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            
+            if (!firstName || !lastName) {
+                showAlert('searchStatus', 'Please enter first and last name', 'warning');
+                return;
+            }
+            
+            const btn = document.getElementById('btnSearch');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+            
+            showAlert('searchStatus', 'Searching LinkedIn...', 'info');
+            
+            try {
+                const response = await fetch('/api/scraper/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        first_name: firstName,
+                        last_name: lastName,
+                        company: document.getElementById('company').value.trim(),
+                        location: document.getElementById('location').value.trim(),
+                        max_results: parseInt(document.getElementById('maxResults').value) || 5
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    state.currentResults = data.results;
+                    state.stats.searches++;
+                    
+                    showToast(`Found ${data.total} profiles!`, 'success');
+                    showAlert('searchStatus', `Found ${data.total} profile(s). Check Results tab.`, 'success');
+                    
+                    displaySearchResults(data.results);
+                    switchTab('results');
+                } else {
+                    showAlert('searchStatus', data.error || 'No results found', 'warning');
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                showAlert('searchStatus', 'Error: ' + error.message, 'error');
+            } finally {
+                updateUIState();
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-search"></i> Search LinkedIn';
+            }
+        }
+
+        // Search and extract
+        async function searchAndExtract() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            
+            if (!firstName || !lastName) {
+                showAlert('searchStatus', 'Please enter first and last name', 'warning');
+                return;
+            }
+            
+            const btn = document.getElementById('btnSearchExtract');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Extracting...';
+            
+            showAlert('searchStatus', 'Searching and extracting profiles... This may take a while.', 'info');
+            
+            try {
+                const response = await fetch('/api/scraper/search-and-extract', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        first_name: firstName,
+                        last_name: lastName,
+                        company: document.getElementById('company').value.trim(),
+                        max_profiles: parseInt(document.getElementById('maxResults').value) || 3
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    state.currentProfiles = data.profiles;
+                    state.currentResults = data.profiles;
+                    state.stats.searches++;
+                    state.stats.profiles += data.profiles_extracted;
+                    
+                    showToast(`Extracted ${data.profiles_extracted} profiles!`, 'success');
+                    showAlert('searchStatus', `Successfully extracted ${data.profiles_extracted} profile(s). Check Results tab.`, 'success');
+                    
+                    displayExtractedProfiles(data.profiles);
+                    switchTab('results');
+                } else {
+                    showAlert('searchStatus', data.error || 'Extraction failed', 'error');
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                showAlert('searchStatus', 'Error: ' + error.message, 'error');
+            } finally {
+                updateUIState();
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-download"></i> Search & Extract All';
+            }
+        }
+
+        // Display search results
+        function displaySearchResults(results) {
+            const container = document.getElementById('resultsContainer');
+            
+            if (!results || results.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--gray-400); padding: 40px;">No results found</p>';
+                return;
+            }
+            
+            let html = '';
+            results.forEach((result, index) => {
+                const initials = result.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                
+                html += `
+                    <div class="result-card" onclick="viewProfile('${result.profile_url}')">
+                        <div class="result-header">
+                            <div class="result-avatar">${initials}</div>
+                            <div class="result-info">
+                                <h3>${escapeHtml(result.name)}</h3>
+                                <p>${escapeHtml(result.headline || 'No headline')}</p>
+                                ${result.location ? `<p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(result.location)}</p>` : ''}
+                            </div>
+                        </div>
+                        <div style="margin-top: 8px;">
+                            <span class="result-badge"><i class="fas fa-link"></i> ${escapeHtml(result.profile_url)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Display extracted profiles
+        function displayExtractedProfiles(profiles) {
+            const container = document.getElementById('resultsContainer');
+            
+            if (!profiles || profiles.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--gray-400); padding: 40px;">No profiles extracted</p>';
+                return;
+            }
+            
+            let html = '';
+            profiles.forEach((profile, index) => {
+                const initials = (profile.name || 'Unknown').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                
+                html += `
+                    <div class="result-card" onclick="showProfileDetail(${index})">
+                        <div class="result-header">
+                            <div class="result-avatar">${initials}</div>
+                            <div class="result-info">
+                                <h3>${escapeHtml(profile.name || 'Unknown')}</h3>
+                                <p>${escapeHtml(profile.headline || 'No headline')}</p>
+                                ${profile.location ? `<p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(profile.location)}</p>` : ''}
+                            </div>
+                        </div>
+                        <div style="margin-top: 8px;">
+                            <span class="result-badge"><i class="fas fa-briefcase"></i> ${profile.experiences ? profile.experiences.length : 0} experiences</span>
+                            <span class="result-badge"><i class="fas fa-graduation-cap"></i> ${profile.education ? profile.education.length : 0} education</span>
+                            <span class="result-badge"><i class="fas fa-tools"></i> ${profile.skills ? profile.skills.length : 0} skills</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // View profile detail
+        async function viewProfile(profileUrl) {
+            const detailDiv = document.getElementById('profileDetail');
+            detailDiv.innerHTML = '<div class="loading-overlay"><div class="spinner"></div><p class="loading-text">Loading profile...</p></div>';
+            detailDiv.classList.add('show');
+            
+            try {
+                const response = await fetch('/api/scraper/extract', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile_url: profileUrl })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showProfileData(data.profile);
+                } else {
+                    detailDiv.innerHTML = '<div class="alert alert-error"><i class="fas fa-times-circle"></i> Failed to load profile</div>';
+                }
+            } catch (error) {
+                detailDiv.innerHTML = `<div class="alert alert-error"><i class="fas fa-times-circle"></i> Error: ${error.message}</div>`;
+            }
+        }
+
+        // Show profile detail
+        function showProfileDetail(index) {
+            const profile = state.currentProfiles[index];
+            if (profile) {
+                showProfileData(profile);
+            }
+        }
+
+        // Show profile data
+        function showProfileData(profile) {
+            const detailDiv = document.getElementById('profileDetail');
+            
+            let html = `
+                <h3><i class="fas fa-id-card"></i> ${escapeHtml(profile.name || 'Unknown')}</h3>
+                <p><strong><i class="fas fa-briefcase"></i> Headline:</strong> ${escapeHtml(profile.headline || 'N/A')}</p>
+                <p><strong><i class="fas fa-map-marker-alt"></i> Location:</strong> ${escapeHtml(profile.location || 'N/A')}</p>
+                <p><strong><i class="fas fa-link"></i> URL:</strong> <a href="${escapeHtml(profile.profile_url || '#')}" target="_blank">Open Profile <i class="fas fa-external-link-alt"></i></a></p>
+            `;
+            
+            if (profile.about) {
+                html += `
+                    <div class="section-title"><i class="fas fa-info-circle"></i> About</div>
+                    <div style="background: white; padding: 16px; border-radius: 8px;">${escapeHtml(profile.about)}</div>
+                `;
+            }
+            
+            if (profile.experiences && profile.experiences.length > 0) {
+                html += `<div class="section-title"><i class="fas fa-briefcase"></i> Experience (${profile.experiences.length})</div>`;
+                profile.experiences.forEach(exp => {
+                    html += `
+                        <div class="experience-item">
+                            <strong>${escapeHtml(exp.title || 'Position')}</strong>
+                            ${exp.company ? `<br><span style="color: var(--gray-500);">${escapeHtml(exp.company)}</span>` : ''}
+                            ${exp.duration ? `<br><small style="color: var(--gray-400);">${escapeHtml(exp.duration)}</small>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            if (profile.education && profile.education.length > 0) {
+                html += `<div class="section-title"><i class="fas fa-graduation-cap"></i> Education (${profile.education.length})</div>`;
+                profile.education.forEach(edu => {
+                    html += `
+                        <div class="education-item">
+                            <strong>${escapeHtml(edu.school || 'School')}</strong>
+                            ${edu.degree ? `<br><span style="color: var(--gray-500);">${escapeHtml(edu.degree)}</span>` : ''}
+                            ${edu.year ? `<br><small style="color: var(--gray-400);">${escapeHtml(edu.year)}</small>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            if (profile.skills && profile.skills.length > 0) {
+                html += `<div class="section-title"><i class="fas fa-tools"></i> Skills (${profile.skills.length})</div>`;
+                html += '<div class="skill-tags">';
+                profile.skills.forEach(skill => {
+                    html += `<span class="skill-tag"><i class="fas fa-star"></i> ${escapeHtml(skill)}</span>`;
+                });
+                html += '</div>';
+            }
+            
+            detailDiv.innerHTML = html;
+            detailDiv.classList.add('show');
+            detailDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Export data
+        async function exportData(format) {
+            const profiles = state.currentProfiles;
+            
+            if (!profiles || profiles.length === 0) {
+                showToast('No data to export. Extract some profiles first.', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/scraper/export', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        data: { profiles },
+                        format: format
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `linkedin_export.${format}`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    showToast(`Data exported as ${format.toUpperCase()}!`, 'success');
+                } else {
+                    showToast('Export failed', 'error');
+                }
+            } catch (error) {
+                showToast('Export error: ' + error.message, 'error');
+            }
+        }
+
+        // Clear results
+        function clearResults() {
+            state.currentResults = [];
+            state.currentProfiles = [];
+            document.getElementById('resultsContainer').innerHTML = `
+                <p style="text-align: center; color: var(--gray-400); padding: 40px;">
+                    <i class="fas fa-inbox" style="font-size: 48px; display: block; margin-bottom: 12px;"></i>
+                    Results cleared. Start a new search.
+                </p>
+            `;
+            document.getElementById('profileDetail').classList.remove('show');
+            document.getElementById('profileDetail').innerHTML = '';
+            showToast('Results cleared', 'info');
+        }
+
+        // Close scraper
+        async function closeScraper() {
+            try {
+                await fetch('/api/scraper/close', { method: 'POST' });
+                state.initialized = false;
+                state.authenticated = false;
+                state.currentResults = [];
+                state.currentProfiles = [];
+                
+                showToast('Scraper closed', 'info');
+                updateUIState();
+                clearResults();
+            } catch (error) {
+                showToast('Error closing: ' + error.message, 'error');
+            }
+        }
+
+        // Utility
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Update stats periodically
+        async function updateStats() {
+            if (!state.initialized) return;
+            
+            try {
+                const response = await fetch('/api/scraper/stats');
+                const data = await response.json();
+                
+                if (data.success && data.stats) {
+                    document.getElementById('statSearches').textContent = data.stats.requests_made || 0;
+                    document.getElementById('statProfiles').textContent = data.stats.profiles_scraped || 0;
+                    
+                    if (data.stats.runtime_seconds) {
+                        const mins = Math.floor(data.stats.runtime_seconds / 60);
+                        const secs = Math.floor(data.stats.runtime_seconds % 60);
+                        document.getElementById('statRuntime').textContent = `${mins}m ${secs}s`;
+                    }
+                }
+            } catch (error) {
+                // Silently fail
+            }
+        }
+
+        // Initialize
+        loadSettings();
+        updateUIState();
+        
+        // Update stats every 5 seconds
+        setInterval(updateStats, 5000);
+    </script>
+</body>
+</html>
